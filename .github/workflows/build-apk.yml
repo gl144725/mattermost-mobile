@@ -1,9 +1,9 @@
-name: build-android-debug
+name: build-android
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
 
 env:
   NODE_VERSION: 24.15.0
@@ -26,17 +26,30 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install dependencies
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Install npm deps
         run: npm ci
+
+      - name: Install bundler
+        run: gem install bundler -v '~> 2.0'
+
+      - name: Bundle install
+        run: cd fastlane && bundle install
 
       - name: Jetify
         run: npx jetify
 
-      - name: Build APK
-        run: cd android && ./gradlew assembleDebug
+      - name: Build debug APK
+        run: cd fastlane && bundle exec fastlane android build --env android.debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: mattermost-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: mattermost-apk
+          path: |
+            *.apk
+            android/app/build/outputs/apk/**/*.apk
