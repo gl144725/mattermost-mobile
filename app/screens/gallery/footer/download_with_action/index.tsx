@@ -25,9 +25,10 @@ import useDidMount from '@hooks/did_mount';
 import {alertFailedToOpenDocument, alertOnlyPDFSupported} from '@utils/document';
 import {getFullErrorMessage} from '@utils/errors';
 import {deleteFile, fileExists, getLocalFilePathFromFile, hasWriteStoragePermission, isPdf, pathWithPrefix} from '@utils/file';
+import {isPreviewableInApp} from '@utils/file/preview';
 import {galleryItemToFileInfo} from '@utils/gallery';
 import {logDebug} from '@utils/log';
-import {previewPdf} from '@utils/navigation';
+import {previewFileInApp, previewPdf} from '@utils/navigation';
 import {typography} from '@utils/typography';
 
 import type {ClientResponse, ProgressPromise} from '@mattermost/react-native-network-client';
@@ -158,8 +159,19 @@ const DownloadWithAction = ({action, enableSecureFilePreview, item, onShareCallb
             if (response.data?.path) {
                 const path = response.data.path as string;
                 onDownloadSuccess?.(path);
-                if (enableSecureFilePreview) {
-                    if (isPdf(galleryItemToFileInfo(item))) {
+
+                // Check for in-app preview first (Markdown, CSV)
+                const fileInfo = galleryItemToFileInfo(item);
+                const previewType = isPreviewableInApp(fileInfo);
+                if (previewType) {
+                    previewFileInApp({
+                        filePath: path,
+                        fileName: decodeURIComponent(item.name),
+                        fileId: item.id,
+                        mimeType: item.mime_type,
+                    });
+                } else if (enableSecureFilePreview) {
+                    if (isPdf(fileInfo)) {
                         previewPdf(item, path, theme);
                     } else {
                         alertOnlyPDFSupported(intl);
@@ -170,8 +182,7 @@ const DownloadWithAction = ({action, enableSecureFilePreview, item, onShareCallb
                         headerTitle: decodeURIComponent(item.name),
                         mimeType: item.mime_type,
                     }).catch(() => {
-                        const file = galleryItemToFileInfo(item);
-                        alertFailedToOpenDocument(file, intl);
+                        alertFailedToOpenDocument(fileInfo, intl);
                     });
                 }
             }
