@@ -108,6 +108,24 @@ export function previewPdf(item: FileInfo | GalleryItemType, path: string, theme
     });
 }
 
+export function previewFileInApp(props: {
+    filePath: string;
+    fileName: string;
+    fileId?: string;
+    mimeType?: string;
+    onDismiss?: () => void;
+}) {
+    DeviceEventEmitter.emit(Events.BLUR_AND_DISMISS_KEYBOARD);
+    CallbackStore.setCallback(props.onDismiss);
+    navigateToScreen(Screens.IN_APP_PREVIEW, {
+        filePath: props.filePath,
+        fileName: props.fileName,
+        fileId: props.fileId || '',
+        title: props.fileName,
+        mimeType: props.mimeType,
+    });
+}
+
 export function openUserProfile(props: UserProfileProps) {
     DeviceEventEmitter.emit(Events.BLUR_AND_DISMISS_KEYBOARD);
     navigateToScreen(Screens.USER_PROFILE, props);
