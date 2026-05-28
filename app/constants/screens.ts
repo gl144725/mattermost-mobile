@@ -44,6 +44,7 @@ const GLOBAL_DRAFTS = 'global_drafts';
 const GLOBAL_THREADS = 'global_threads';
 const HOME = '(home)';
 const INTEGRATION_SELECTOR = 'integration_selector';
+const IN_APP_PREVIEW = 'in_app_preview';
 const INTERACTIVE_DIALOG = 'interactive_dialog';
 const INVITE = 'invite';
 const JOIN_TEAM = 'join_team';
@@ -129,6 +130,7 @@ export default {
     GENERIC_BOTTOM_SHEET,
     HOME,
     INTEGRATION_SELECTOR,
+    IN_APP_PREVIEW,
     INTERACTIVE_DIALOG,
     DIALOG_ROUTER,
     INVITE,
