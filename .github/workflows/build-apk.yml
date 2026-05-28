@@ -5,9 +5,6 @@ on:
   push:
     branches: [main]
 
-env:
-  NODE_VERSION: 24.15.0
-
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -30,26 +27,20 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
+          bundler-cache: true
 
-      - name: Install npm deps
-        run: npm ci
-
-      - name: Install bundler
-        run: gem install bundler -v '~> 2.0'
-
-      - name: Bundle install
-        run: cd fastlane && bundle install
+      - name: Install npm packages
+        run: npm install --ignore-scripts
 
       - name: Jetify
         run: npx jetify
 
       - name: Build debug APK
-        run: cd fastlane && bundle exec fastlane android build --env android.debug
+        run: cd android && ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mattermost-apk
           path: |
-            *.apk
-            android/app/build/outputs/apk/**/*.apk
+            android/app/build/outputs/apk/debug/*.apk
