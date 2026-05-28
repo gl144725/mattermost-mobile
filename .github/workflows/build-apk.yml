@@ -4,16 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - '**.ts'
-      - '**.tsx'
-      - '**.js'
-      - '**.json'
-      - '**/build-apk.yml'
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,9 +18,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
       - run: npm install --legacy-peer-deps
+        timeout-minutes: 15
       - run: npx jetify
       - run: cd android && ./gradlew assembleDebug --no-daemon
+        timeout-minutes: 10
       - uses: actions/upload-artifact@v4
         with:
           name: mattermost-apk
