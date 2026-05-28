@@ -1,8 +1,15 @@
 name: build-android
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.json'
+      - '**/build-apk.yml'
 
 jobs:
   build:
@@ -16,16 +23,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Install npm packages
-        run: npm install --legacy-peer-deps
-
-      - name: Jetify
-        run: npx jetify
-
-      - name: Build debug APK
-        run: cd android && ./gradlew assembleDebug --no-daemon
-
+      - run: npm install --legacy-peer-deps
+      - run: npx jetify
+      - run: cd android && ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: mattermost-apk
